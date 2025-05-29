@@ -4,38 +4,35 @@
     <meta charset="UTF-8">
     <title>경로 검색 결과 (네이버)</title>
     <style>
-        /* index.html의 스타일과 유사하게 꾸며주세요 */
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; border: 1px solid #e1e4e8; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         h1, h2 { color: #24292e; border-bottom: 1px solid #eaecef; padding-bottom: .3em; }
         .summary { background-color: #f6f8fa; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+        .station-name { font-weight: bold; }
         a { color: #0366d6; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        ol li { margin-bottom: 0.5em; }
     </style>
 </head>
 <body>
     <h1>경로 검색 결과</h1>
 
-    {% if path_data %}
+    {% if path_data and path_data.summary %}
+        <h2><span class="station-name">{{ start_name }}</span> → <span class="station-name">{{ end_name }}</span></h2>
         <div class="summary">
-            <p><strong>총 소요 시간:</strong> {{ (path_data.summary.duration / 60) | round | int }}분</p>
-            <p><strong>요금(카드):</strong> {{ "{:,.0f}".format(path_data.summary.payment) }}원</p>
-            <p><strong>총 도보 시간:</strong> {{ (path_data.summary.walkingDuration / 60) | round | int }}분</p>
+            <p><strong>총 소요 시간:</strong> {{ (path_data.summary.duration / 60000) | round | int }}분</p> <p><strong>요금(카드):</strong> {{ "{:,.0f}".format(path_data.summary.payment) }}원</p>
+            <p><strong>총 도보 시간:</strong> {{ (path_data.summary.walkingDuration / 60000) | round | int }}분</p> <p><strong>환승 횟수:</strong> {{ path_data.summary.transferCount }}회</p>
         </div>
 
         <h2>상세 경로</h2>
-        <ul>
+        <ol>
         {% for leg in path_data.legs %}
-            <li>
-                <strong>{{ leg.steps[0].startLocation.name }} → {{ leg.steps[0].endLocation.name }}</strong>
-                <ul>
-                {% for step in leg.steps %}
-                    <li>{{ step.instruction }}</li>
-                {% endfor %}
-                </ul>
-            </li>
+            {% for step in leg.steps %}
+                <li>{{ step.instruction }}</li>
+            {% endfor %}
         {% endfor %}
-        </ul>
+        </ol>
     {% else %}
-        <p>경로 정보를 찾을 수 없습니다.</p>
+        <p>경로 정보를 찾을 수 없습니다. 역 이름을 다시 확인해주세요.</p>
     {% endif %}
 
     <a href="/">새로운 경로 검색하기</a>
