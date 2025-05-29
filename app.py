@@ -12,10 +12,12 @@ NAVER_CLIENT_SECRET = os.environ.get('NAVER_CLIENT_SECRET')
 # 장소 이름을 좌표로 변환하는 함수 (네이버 지오코딩 API 사용)
 def get_coords_from_name(station_name):
     if not NAVER_CLIENT_ID or not NAVER_CLIENT_SECRET:
-        print("API 키가 설정되지 않았습니다.") # 실제 서버에서는 로깅 등으로 대체
+        print("API 키가 설정되지 않았습니다.")
         return None
 
-    geocode_url = "https://naveropenapi.apigw.ntruss.com/map-geocode/v1/geocode"
+    # 네이버 지오코딩 API v2 엔드포인트 주소로 수정
+    geocode_url = "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode" # <--- 버전 'v2'로 변경!
+    
     params = {'query': station_name}
     headers = {
         "X-NCP-APIGW-API-KEY-ID": NAVER_CLIENT_ID,
@@ -24,19 +26,23 @@ def get_coords_from_name(station_name):
     
     try:
         response = requests.get(geocode_url, params=params, headers=headers)
-        response.raise_for_status() # 요청 실패 시 예외 발생
+        response.raise_for_status() 
         data = response.json()
         
-        if data.get('status') == 'OK' and data.get('addresses'):
-            x = data['addresses'][0]['x'] # 경도(longitude)
-            y = data['addresses'][0]['y'] # 위도(latitude)
-            return f"{x},{y}" # "경도,위도" 문자열 형태로 반환
+        # v2 응답 형식에 맞게 수정 (응답 상태 코드 'status'와 주소 목록 'addresses' 확인)
+        if data.get('status') == 'OK' and data.get('addresses') and len(data['addresses']) > 0:
+            # 첫 번째 주소 정보의 x(경도), y(위도) 값을 사용
+            x = data['addresses'][0]['x'] 
+            y = data['addresses'][0]['y'] 
+            return f"{x},{y}"
+    except requests.exceptions.HTTPError as http_err:
+        print(f"지오코딩 API HTTP 오류: {http_err} - 응답: {response.text}")
     except requests.exceptions.RequestException as e:
-        print(f"지오코딩 API 요청 오류: {e}") # 실제 서버에서는 로깅
+        print(f"지오코딩 API 요청 오류: {e}")
     except KeyError as e:
-        print(f"지오코딩 API 응답 파싱 오류: 키 {e}를 찾을 수 없음")
+        print(f"지오코딩 API 응답 파싱 오류: 키 {e}를 찾을 수 없음 - 응답: {data}")
     except IndexError:
-        print(f"지오코딩 API 응답 파싱 오류: 'addresses' 리스트가 비어있음")
+        print(f"지오코딩 API 응답 파싱 오류: 'addresses' 리스트가 비어있거나 형식이 다름 - 응답: {data}")
         
     return None
 
