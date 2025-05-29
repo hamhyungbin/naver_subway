@@ -18,12 +18,12 @@
     <h1>수도권 지하철 경로 검색</h1>
     <form action="/search_route" method="get">
         <div class="form-group">
-            <label for="start_station">출발역 ID</label>
-            <input type="text" id="start_station" name="start_station" placeholder="예: 222 (강남역)" required>
+            <label for="start_station_name">출발역 이름</label>
+            <input type="text" id="start_station_name" name="start_station_name" placeholder="예: 강남역" required>
         </div>
         <div class="form-group">
-            <label for="end_station">도착역 ID</label>
-            <input type="text" id="end_station" name="end_station" placeholder="예: 216 (잠실역)" required>
+            <label for="end_station_name">도착역 이름</label>
+            <input type="text" id="end_station_name" name="end_station_name" placeholder="예: 잠실역" required>
         </div>
         <button type="submit">경로 검색</button>
     </form>
